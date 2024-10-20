@@ -1,31 +1,53 @@
-
-
 #include "types.h"
+#include <string.h>
 
 extern struct NODE* root;
 extern struct NODE* cwd;
 
-//make directory
-void mkdir(char pathName[]){
-
-    // TO BE IMPLEMENTED
-    //
-    // YOUR CODE TO REPLACE THE PRINTF FUNCTION BELOW
-
-    printf("TO BE IMPLEMENTED\n");
+void mkdir(char pathName[]) { 
+        
+    struct NODE* node = (struct NODE*)malloc(sizeof(struct NODE));
+    strcpy(node->name, pathName);
+    node->fileType = 'D';
+    node->parentPtr = cwd;
+    node->childPtr = NULL;
+    node->siblingPtr = NULL;
+    
 
     return;
 }
 
 //handles tokenizing and absolute/relative pathing options
-struct NODE* splitPath(char* pathName, char* baseName, char* dirName){
+struct NODE* splitPath(char* pathName, char* baseName, char* dirName){ 
+    
+    // iterates pathName and splits based on delimiter '/'. ends at
+    // null terminator
 
-    // TO BE IMPLEMENTED
-    // NOTE THAT WITHOUT COMPLETING THIS FUNCTION CORRECTLY
-    // rm, rmdir, ls, cd, touch COMMANDS WILL NOT EXECUTE CORRECTLY
-    // SEE THE PROVIDED EXECUTABLE TO SEE THEIR EXPECTED BEHAVIOR
+    int i = 0;
+    int lastIndex = 0; 
+    int delimCount = 0; 
 
-    // YOUR CODE HERE
-    //
+    while(pathName[i] != '\0') {
+        if(pathName[i] == '/') { 
+            lastIndex = i;
+            delimCount += 1;
+        }
+        i++;
+    }
+    
+    //occupies baseName and dirName pointers with their proper values
+    // (return using function arguments)
+    
+
+    if(delimCount < 1) { 
+        strcpy(baseName, pathName + lastIndex + 1);
+        strncpy(dirName, pathName, lastIndex);
+    } else if(delimCount == 0) {
+        strcpy(baseName, pathName);
+        strcpy(dirName, "");
+    }
+    
+    
+    
     return NULL;
 }
