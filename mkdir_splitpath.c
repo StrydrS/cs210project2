@@ -58,8 +58,10 @@ void mkdir(char pathName[]) {
     char* tempPath = trim(pathName);
 
     if((tempPath[0] == '\0') | (tempPath[0] == '/')) { 
-        printf("MKDIR ERROR: no path provided\n");
-        return;
+        if(tempPath[1] == '\0') { 
+            printf("MKDIR ERROR: no path provided\n");
+            return;
+        }
     }
 
     struct NODE* parent = splitPath(pathName, baseName, dirName); 
