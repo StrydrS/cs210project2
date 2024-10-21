@@ -130,7 +130,7 @@ struct NODE* splitPath(char* pathName, char* baseName, char* dirName) {
             current = findChildNode(current, token); 
             if(current == NULL) { 
                 
-                printf("ERROR: directory %s does not exist", token);
+                printf("ERROR: directory %s does not exist\n", token);
                 return NULL;
             }
             token = strtok(NULL, "/");
