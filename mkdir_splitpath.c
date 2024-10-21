@@ -87,7 +87,7 @@ void mkdir(char pathName[]) {
     
     addChildNode(parent, newNode);
 
-    printf("MKDIR SUCCESS: node <%s> successfully created\n", baseName);
+    printf("MKDIR SUCCESS: node %s successfully created\n", baseName);
 }
 
 
@@ -130,7 +130,7 @@ struct NODE* splitPath(char* pathName, char* baseName, char* dirName) {
             current = findChildNode(current, token); 
             if(current == NULL) { 
                 
-                printf("ERROR: directory <%s> does not exist", token);
+                printf("ERROR: directory %s does not exist", token);
                 return NULL;
             }
             token = strtok(NULL, "/");
