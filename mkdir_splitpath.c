@@ -87,7 +87,7 @@ void mkdir(char pathName[]) {
     
     addChildNode(parent, newNode);
 
-    printf("MKDIR SUCCESS: node %s successfully created\n", baseName);
+    printf("MKDIR SUCCESS: node %s successfully created\n", pathName);
 }
 
 
