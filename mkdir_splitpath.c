@@ -4,50 +4,139 @@
 extern struct NODE* root;
 extern struct NODE* cwd;
 
-void mkdir(char pathName[]) { 
-        
-    struct NODE* node = (struct NODE*)malloc(sizeof(struct NODE));
-    strcpy(node->name, pathName);
-    node->fileType = 'D';
-    node->parentPtr = cwd;
-    node->childPtr = NULL;
-    node->siblingPtr = NULL;
-    
+char* trim(char*str) { 
 
-    return;
+    char *end;
+    while(*str == ' ') str++;
+    
+    if(*str == '\0') return str;
+
+    end = str + strlen(str) - 1;
+    
+    while(end > str && *end == ' ') end--;
+
+    *(end + 1) = '\0';
+
+    return str; 
+
 }
 
-//handles tokenizing and absolute/relative pathing options
-struct NODE* splitPath(char* pathName, char* baseName, char* dirName){ 
+void addChildNode(struct NODE* parent, struct NODE* newNode) { 
     
-    // iterates pathName and splits based on delimiter '/'. ends at
-    // null terminator
+    //case that parent has no children
+    if(parent->childPtr == NULL) {
+        parent->childPtr = newNode;
 
-    int i = 0;
-    int lastIndex = 0; 
-    int delimCount = 0; 
-
-    while(pathName[i] != '\0') {
-        if(pathName[i] == '/') { 
-            lastIndex = i;
-            delimCount += 1;
+    //case that parent has children, iterate until child has no sibling
+    } else {
+        struct NODE* current = parent->childPtr;
+        while(current->siblingPtr != NULL) {
+            current = current->siblingPtr;
         }
-        i++;
+    current->siblingPtr = newNode;
     }
-    
-    //occupies baseName and dirName pointers with their proper values
-    // (return using function arguments)
-    
+}
 
-    if(delimCount < 1) { 
-        strcpy(baseName, pathName + lastIndex + 1);
-        strncpy(dirName, pathName, lastIndex);
-    } else if(delimCount == 0) {
-        strcpy(baseName, pathName);
-        strcpy(dirName, "");
+struct NODE* findChildNode(struct NODE* parent, const char* name) {
+    
+    struct NODE* current = parent->childPtr;
+
+    while(current != NULL) {
+        if(strcmp(current->name, name) == 0) { 
+            return current;
+        }
+        current = current->siblingPtr;
     }
-    
-    
     
     return NULL;
+}
+
+void mkdir(char pathName[]) { 
+
+    char dirName[256];
+    char baseName[64]; 
+    char* tempPath = trim(pathName);
+
+    if((tempPath[0] == '\0') | (tempPath[0] == '/')) { 
+        printf("MKDIR ERROR: no path provided\n");
+        return;
+    }
+
+    struct NODE* parent = splitPath(pathName, baseName, dirName); 
+    
+    if(parent == NULL) { 
+        return;
+    }
+
+    if(findChildNode(parent,baseName) != NULL) { 
+        printf("MKDIR ERROR: directory %s already exists\n", baseName);
+        return;
+    }
+
+    struct NODE* newNode = (struct NODE*)malloc(sizeof(struct NODE));
+    if(newNode == NULL) {
+        printf("MKDIR ERROR: mem alloc failed\n");
+        return;
+    }
+
+    strcpy(newNode->name, baseName);
+    newNode->fileType = 'D';
+    newNode->childPtr = NULL;
+    newNode->siblingPtr = NULL;
+    newNode->parentPtr = parent;
+    
+    addChildNode(parent, newNode);
+
+    printf("MKDIR SUCCESS: node <%s> successfully created\n", baseName);
+}
+
+
+//handles tokenizing and absolute/relative pathing options
+struct NODE* splitPath(char* pathName, char* baseName, char* dirName) { 
+    
+    if(strcmp(pathName, "/") == 0) {
+        strcpy(dirName, "/"); 
+        strcpy(baseName, "");
+
+        return root;
+
+    }
+    
+    // finds the last occurance of '/'
+    char* final = strrchr(pathName, '/');
+    
+    //no '/' in path name, file is in cwd
+    if(final == NULL) { 
+        strcpy(baseName, pathName);
+        strcpy(dirName, "");
+        
+        return cwd;
+
+    } else { 
+        int directoryLen = final - pathName;
+        if(directoryLen == 0) { 
+            strcpy(dirName, "/");
+        } else {
+            strncpy(dirName, pathName, directoryLen);
+            dirName[directoryLen] = '\0'; 
+        } 
+        strcpy(baseName, final + 1);
+        struct NODE* current = (directoryLen == 0) ? root : cwd;
+        char tempPath[256];
+        strncpy(tempPath, dirName, sizeof(tempPath));
+
+        char* token = strtok(tempPath, "/");
+        while(token != NULL && current != NULL) { 
+            current = findChildNode(current, token); 
+            if(current == NULL) { 
+                
+                printf("ERROR: directory <%s> does not exist", token);
+                return NULL;
+            }
+            token = strtok(NULL, "/");
+        }
+        return current;
+
+    }
+
 }
